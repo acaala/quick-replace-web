@@ -5,17 +5,178 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quick Replace</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        html,body { height: 100%;}
+        * {
+            font-family: 'Anuphan', sans-serif;
+            box-sizing: border-box;
+            margin: 0;
+        }
+
+        body {
+            background-color: #0f0f0f;
+            color: #fff;
+            padding: 0 2rem;
+            
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto; 
+
+        }
+
+        h1 {
+            text-align: center;
+            margin: 2rem 0;
+            font-size: 2.5rem;
+        }
+
+        .form {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        input[type=text] {
+            border-radius: 0.25rem;
+            border: 1px solid rgba(128, 128, 128, 0.7);
+            background: rgba(22, 22, 22, 0.7);
+            font-size: 1rem;
+            color: inherit;
+            padding: 1rem;
+
+        }
+        input:focus {
+            outline: rgb(3 105 161) solid 1px;
+        }
+
+        .file-input {
+            background-color: rgba(22, 22, 22, 0.7);
+            position: relative;
+            padding: 3rem;
+            border-radius: 0.25rem;
+            border: 1px dashed rgba(128, 128, 128, 0.7);
+        }
+
+        .file-input span {
+            font-size: 1.125rem;
+            opacity: .8;
+        }
+
+        input[type=file] {
+            opacity: 0;
+            position: absolute;
+            inset: 0;
+            cursor: pointer;
+        }
+
+        button {
+            box-shadow: none;
+            border: none;
+            cursor: pointer;
+        }
+
+
+        button:not(.repeat), .download a {
+            padding: .75rem 1rem;
+            background-color: rgb(7 89 133);
+            border-radius: .25rem;
+            border: 1px solid rgb(2 132 199);
+            box-shadow: none;
+            color: #fff;
+            font-size: 1.125rem;
+            font-weight: 600;
+            transition: background 100ms ease;
+            text-decoration: none;
+        }
+
+        button:not(.repeat):hover, .download a:hover {
+            background-color: transparent;
+        }
+
+        .download {
+            text-align: center;
+            margin: 4rem 0;
+            display: none;
+        }
+
+        .download a {
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+
+        .download p {
+            font-size: 1.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .download span {
+            font-size: 2rem;
+        }
+
+        .repeat {
+            background-color: transparent;
+            color: rgb(2 132 199);
+            font-size: 1rem;
+        }
+
+        .lines {
+            margin-top: auto;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .lines p {
+            font-size: 1.25rem;
+            opacity: .8;
+            letter-spacing: 1px;
+            margin-bottom: .5rem;
+        }
+
+        .lines span {
+            font-size: 2.75rem;
+        }
+
+
+    </style>
 </head>
 <body>
-    <h1>Hello from Warp!</h1>
 
-    <input type="file">
-    <button>Send file</button>
+    <div class="container">
 
-    <p>Lines replaced <span class="js-lines">0</span></p>
+        <h1>Quick Replace!</h1>
 
-    <div class="js-download">
+        <div class="lines">
+            <p>Words already replaced</p>
+            <span class="js-lines">0</span>
+        </div>
 
+        <form class="form">
+            <input required type="text" name="from" id="from" placeholder="From">
+            <input required type="text" name="to" id="to" placeholder="To">
+            <div class="file-input">
+                <span>Drag or Click to upload a file.</span>
+                <input type="file">
+
+            </div>
+    
+            <button type="submit">Replace!</button>
+        </form>
+
+        <div class="download js-download-container">
+            <p>Replaced <span class="js-this-replaced">0</span> Words</p>
+            <div class="js-download"></div>
+            <p>or</p>
+            <button class="repeat js-repeat">Replace another file</button>
+        </div>
+    
     </div>
 
     <script>
@@ -31,32 +192,45 @@
             console.log(msg);
             if(msg.matches > 0) {
                 let lines = document.querySelector('.js-lines')
-                let newLines = parseInt(lines.innerText) + msg.matches;
-                lines.innerText = newLines;
+                let currentLines = parseInt(lines.innerText);
+                let increaseCount = setInterval(() => {
+                    if (currentLines <= msg.matches ) {
+                        lines.innerText = currentLines;
+                        currentLines++;
+                    }
+                }, 50);
+                if (currentLines == msg.matches) clearInterval(increaseCount);
             }
 
-            if(msg.isOnlyMatches) {
-
-                console.log(msg.matches);
-            } else {
-                console.log(msg.filepath);
+            if(!msg.isOnlyMatches) {
                 let downloadDiv = document.querySelector('.js-download');
                 let downloadBtn = document.createElement('a');
                 downloadBtn.href = `/temp/${msg.filepath}`;
                 downloadBtn.download = msg.filepath;
                 downloadBtn.innerText = 'Download now';
-
+                document.querySelector('.js-this-replaced').innerText = msg.matches;
+                document.querySelector('form').style.display = 'none';
+                document.querySelector('.js-download-container').style.display = 'block';
                 downloadDiv.appendChild(downloadBtn);
             }
         }
 
-        document.querySelector('button').addEventListener('click', () => {
-            let inputFile = document.querySelector('input');
+        document.querySelector('.js-repeat').addEventListener('click', () => {
+            document.querySelector('form').style.display = 'flex';
+            document.querySelector('.js-download-container').style.display = 'none';
+            document.querySelector('.js-download').innerHTML = '';
+            document.querySelectorAll('input').forEach(e => e.value = '');
+        })
+
+        document.querySelector('form').addEventListener('submit', (e) => {
+            e.preventDefault();
 
             let data = {
-                from: 'just',
-                to: 'example.com',
+                from: document.getElementById('from').value,
+                to: document.getElementById('to').value,
             }
+
+            let inputFile = document.querySelector('input[type=file]');
 
             data.filename = inputFile.files[0].name;
 
