@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Replace</title>
+</head>
+<body>
+    <h1>Hello from Warp!</h1>
+
+    <input type="file">
+    <button>Send file</button>
+
+    <p>Lines replaced <span class="js-lines">0</span></p>
+
+    <div class="js-download">
+
+    </div>
+
+    <script>
+        const uri = 'ws://' + location.host + '/ws';
+        const ws = new WebSocket(uri);
+
+        ws.onopen = () => {
+            console.log('connected')
+        }
+
+        ws.onmessage = (e) => {
+            let msg = JSON.parse(e.data);
+            console.log(msg);
+            if(msg.matches > 0) {
+                let lines = document.querySelector('.js-lines')
+                let newLines = parseInt(lines.innerText) + msg.matches;
+                lines.innerText = newLines;
+            }
+
+            if(msg.isOnlyMatches) {
+
+                console.log(msg.matches);
+            } else {
+                console.log(msg.filepath);
+                let downloadDiv = document.querySelector('.js-download');
+                let downloadBtn = document.createElement('a');
+                downloadBtn.href = `/temp/${msg.filepath}`;
+                downloadBtn.download = msg.filepath;
+                downloadBtn.innerText = 'Download now';
+
+                downloadDiv.appendChild(downloadBtn);
+            }
+        }
+
+        document.querySelector('button').addEventListener('click', () => {
+            let inputFile = document.querySelector('input');
+
+            let data = {
+                from: 'just',
+                to: 'example.com',
+            }
+
+            data.filename = inputFile.files[0].name;
+
+            let reader = new FileReader();
+            let fileByteArray = [];
+            
+            reader.readAsText(inputFile.files[0]);
+            reader.onloadend = function (evt) {
+                data.data = event.target.result;
+                ws.send(JSON.stringify(data));
+            }            
+        })
+    </script>
+</body>
+</html>
