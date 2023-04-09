@@ -2,6 +2,7 @@ use futures_util::{SinkExt, StreamExt, TryFutureExt};
 use quick_replace_web::{user, utils, Files, Users};
 use serde_json::{json, Value};
 use std::{
+    env,
     fs::{self},
     sync::atomic::{AtomicUsize, Ordering},
 };
@@ -38,7 +39,17 @@ async fn main() {
     let files = warp::path("temp").and(warp::fs::dir("./temp/"));
 
     let routes = index.or(websocket_upgrade).or(files);
-    warp::serve(routes).run(([127, 0, 0, 1], 3000)).await;
+
+    fn get_server_port() -> u16 {
+        env::var("PORT")
+            .ok()
+            .and_then(|p| p.parse().ok())
+            .unwrap_or(8080)
+    }
+
+    warp::serve(routes)
+        .run(([0, 0, 0, 0], get_server_port()))
+        .await;
 }
 
 async fn user_connected(ws: WebSocket, users: Users, files: Files) {
