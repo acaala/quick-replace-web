@@ -1,1 +1,1 @@
-web: ./target/release/warp_socket
+web: ./target/release/quick_replace_web
