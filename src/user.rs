@@ -67,8 +67,6 @@ pub async fn request(user_id: usize, msg: Message, users: &Users) {
     let prev_matches = fs::read_to_string("./static/info.txt").unwrap();
     let new_matches = if !prev_matches.is_empty() {
         let mut prev_matches = prev_matches.parse::<usize>().unwrap();
-        // let prev_matches = usize::try_from(prev_matches).unwrap();
-        println!("isnt");
         prev_matches += str_matches;
         prev_matches
     } else {
