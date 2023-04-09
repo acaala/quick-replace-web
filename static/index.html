@@ -161,7 +161,7 @@
         <form class="form">
             <input required type="text" name="from" id="from" placeholder="From">
             <input required type="text" name="to" id="to" placeholder="To">
-            <div class="file-input">
+            <div class="file-input js-file-input">
                 <span>Drag or Click to upload a file.</span>
                 <input type="file">
 
@@ -189,12 +189,19 @@
 
         ws.onmessage = (e) => {
             let msg = JSON.parse(e.data);
-            console.log(msg);
+            if (msg.initial) {
+                console.log('here');
+                document.querySelector('.js-lines').innerText = msg.initial;
+                return;
+            }
+
             if(msg.matches > 0) {
                 let lines = document.querySelector('.js-lines')
                 let currentLines = parseInt(lines.innerText);
+                let initialLines = currentLines;
+
                 let increaseCount = setInterval(() => {
-                    if (currentLines <= msg.matches ) {
+                    if (currentLines <= (initialLines + msg.matches)) {
                         lines.innerText = currentLines;
                         currentLines++;
                     }
@@ -242,6 +249,18 @@
                 data.data = event.target.result;
                 ws.send(JSON.stringify(data));
             }            
+        })
+
+        let fileInput = document.querySelector('.js-file-input');
+        let fileInputTextElement = fileInput.querySelector('span');
+        let originalFileInputText = fileInputTextElement.innerText;
+        fileInput.addEventListener('change', (e) => {
+            if(e.target.files[0]) {
+                let filename = e.target.files[0].name;
+                fileInputTextElement.innerText = filename;
+            } else {
+                fileInputTextElement.innerText = originalFileInputText;
+            }
         })
     </script>
 </body>
