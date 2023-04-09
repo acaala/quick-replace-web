@@ -1,4 +1,5 @@
 use futures_util::{SinkExt, StreamExt, TryFutureExt};
+use quick_replace_web::{user, utils, Files, Users};
 use serde_json::{json, Value};
 use std::{
     fs::{self},
@@ -9,7 +10,6 @@ use warp::{
     ws::{Message, WebSocket},
     Filter,
 };
-use warp_sockets::{user, utils, Files, Users};
 
 use quick_replace::worker;
 

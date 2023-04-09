@@ -819,6 +819,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "quick-replace-web"
+version = "0.1.0"
+dependencies = [
+ "futures-util",
+ "quick-replace",
+ "regex",
+ "serde_json",
+ "tokio",
+ "tokio-stream",
+ "warp",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1317,19 +1330,6 @@ dependencies = [
  "tokio-util",
  "tower-service",
  "tracing",
-]
-
-[[package]]
-name = "warp_sockets"
-version = "0.1.0"
-dependencies = [
- "futures-util",
- "quick-replace",
- "regex",
- "serde_json",
- "tokio",
- "tokio-stream",
- "warp",
 ]
 
 [[package]]
