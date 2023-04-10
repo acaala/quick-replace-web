@@ -10,7 +10,7 @@ use serde_json::{json, Value};
 use tokio::sync::RwLock;
 use warp::ws::{Message, WebSocket};
 
-use crate::{utils, Users};
+use crate::Users;
 
 pub async fn connect(user_tx: &mut SplitSink<WebSocket, Message>) {
     let _ = OpenOptions::new()
@@ -63,7 +63,7 @@ pub async fn request(user_id: usize, msg: Message, users: &Users) {
     let from = &parsed_user_req["from"].as_str().unwrap().to_owned();
     let data = &parsed_user_req["data"].as_str().unwrap().to_owned();
 
-    let str_matches = utils::str_regex_matches(from, data);
+    let str_matches = data.matches(from).count();
     let prev_matches = fs::read_to_string("./static/info.txt").unwrap();
     let new_matches = if !prev_matches.is_empty() {
         let mut prev_matches = prev_matches.parse::<usize>().unwrap();

@@ -4,7 +4,6 @@ use tokio::sync::{mpsc, RwLock};
 use warp::ws::Message;
 
 pub mod user;
-pub mod utils;
 
 pub type Users = Arc<RwLock<HashMap<usize, mpsc::UnboundedSender<Message>>>>;
 pub type Files = Arc<RwLock<HashMap<usize, std::string::String>>>;

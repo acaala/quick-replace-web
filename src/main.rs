@@ -1,5 +1,5 @@
 use futures_util::{SinkExt, StreamExt, TryFutureExt};
-use quick_replace_web::{user, utils, Files, Users};
+use quick_replace_web::{user, Files, Users};
 use serde_json::{json, Value};
 use std::{
     env,
@@ -72,13 +72,12 @@ async fn user_connected(ws: WebSocket, users: Users, files: Files) {
                 let from = parsed_json["data"]["from"].as_str().unwrap();
                 let to = parsed_json["data"]["to"].as_str().unwrap();
                 let filename = parsed_json["data"]["filename"].as_str().unwrap();
-
-                let result = utils::str_regex_replace(from, data, to);
+                let result = data.replace(&from, &to);
 
                 //  Create new file.
                 let filepath = format!("./temp/{}", filename);
-                fs::create_dir("./temp").unwrap_or_else(|e| println!("Error creating dir: {}", e));
-                worker::create_file_and_put_contents(result.into_owned(), &filepath).unwrap();
+                // fs::create_dir("./temp").unwrap_or_else(|e| println!("Error creating dir: {}", e));
+                worker::create_file_and_put_contents(result, &filepath).unwrap();
 
                 // Write user_id and filepath, used for file deletion on user discconnect.
                 let user_id = parsed_json["user_id"].as_i64().unwrap();
