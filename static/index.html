@@ -183,6 +183,21 @@
         const uri = 'wss://' + location.host + '/ws';
         const ws = new WebSocket(uri);
 
+        let currentlyUpdating = false;
+        let total = 0;
+
+        let fileInput = document.querySelector('.js-file-input');
+        let fileInputTextElement = fileInput.querySelector('span');
+        let originalFileInputText = fileInputTextElement.innerText;
+        fileInput.addEventListener('change', (e) => {
+            if(e.target.files[0]) {
+                let filename = e.target.files[0].name;
+                fileInputTextElement.innerText = filename;
+            } else {
+                fileInputTextElement.innerText = originalFileInputText;
+            }
+        })
+
         ws.onopen = () => {
             console.log('connected')
         }
@@ -190,23 +205,27 @@
         ws.onmessage = (e) => {
             let msg = JSON.parse(e.data);
             if (msg.initial) {
-                console.log('here');
                 document.querySelector('.js-lines').innerText = msg.initial;
+                total = msg.initial
                 return;
             }
 
             if(msg.matches > 0) {
                 let lines = document.querySelector('.js-lines')
                 let currentLines = parseInt(lines.innerText);
-                let initialLines = currentLines;
+                total = parseInt(total) + msg.matches;
 
-                let increaseCount = setInterval(() => {
-                    if (currentLines <= (initialLines + msg.matches)) {
-                        lines.innerText = currentLines;
-                        currentLines++;
-                    }
-                }, 50);
-                if (currentLines == msg.matches) clearInterval(increaseCount);
+                if (!currentlyUpdating) {
+                    let increaseCount = setInterval(() => {
+                        currentlyUpdating = true;
+                        if (currentLines <= total) {
+                            lines.innerText = currentLines;
+                            currentLines++;
+                        }
+                    }, 50);
+                    if (currentLines == msg.matches) clearInterval(increaseCount);
+                    currentlyUpdating = false;
+                }
             }
 
             if(!msg.isOnlyMatches) {
@@ -226,7 +245,13 @@
             document.querySelector('form').style.display = 'flex';
             document.querySelector('.js-download-container').style.display = 'none';
             document.querySelector('.js-download').innerHTML = '';
-            document.querySelectorAll('input').forEach(e => e.value = '');
+            document.querySelectorAll('input').forEach(e => { 
+                if(e.type == 'file') {
+                    fileInputTextElement.innerText = originalFileInputText;
+                }
+                e.value = '';
+            }
+            );
         })
 
         document.querySelector('form').addEventListener('submit', (e) => {
@@ -249,18 +274,6 @@
                 data.data = event.target.result;
                 ws.send(JSON.stringify(data));
             }            
-        })
-
-        let fileInput = document.querySelector('.js-file-input');
-        let fileInputTextElement = fileInput.querySelector('span');
-        let originalFileInputText = fileInputTextElement.innerText;
-        fileInput.addEventListener('change', (e) => {
-            if(e.target.files[0]) {
-                let filename = e.target.files[0].name;
-                fileInputTextElement.innerText = filename;
-            } else {
-                fileInputTextElement.innerText = originalFileInputText;
-            }
         })
     </script>
 </body>
