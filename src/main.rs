@@ -76,7 +76,7 @@ async fn user_connected(ws: WebSocket, users: Users, files: Files) {
 
                 //  Create new file.
                 let filepath = format!("./temp/{}", filename);
-                // fs::create_dir("./temp").unwrap_or_else(|e| println!("Error creating dir: {}", e));
+                fs::create_dir("./temp").unwrap_or_else(|e| println!("Error creating dir: {}", e));
                 worker::create_file_and_put_contents(result, &filepath).unwrap();
 
                 // Write user_id and filepath, used for file deletion on user discconnect.
